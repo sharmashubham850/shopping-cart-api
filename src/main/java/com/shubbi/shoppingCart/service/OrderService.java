@@ -1,12 +1,14 @@
 package com.shubbi.shoppingCart.service;
 
 import com.shubbi.shoppingCart.entity.Order;
-import com.shubbi.shoppingCart.entity.OrderItem;
+import com.shubbi.shoppingCart.entity.CartItem;
+import com.shubbi.shoppingCart.entity.Product;
 import com.shubbi.shoppingCart.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,18 +31,22 @@ public class OrderService {
         return orderRepository.findById(orderId).orElseThrow();
     }
 
-    public List<OrderItem> orderItems(Long orderId){
+    public List<CartItem> orderItems(Long orderId){
         Order order = orderRepository.findById(orderId).orElseThrow();
         return order.getItems();
     }
 
     public Order createOrder(Map<String, Object> orderMap){
         String orderDescription = (String) orderMap.get("description");
-        List<Map<String, Object>> cartItems = (List<Map<String, Object>>) orderMap.get("items");
+        List<Map<String, Object>> cartItems = (List<Map<String, Object>>) orderMap.get("cartItems");
 
-        List<OrderItem> orderItems = getOrderItems(cartItems);
+        List<CartItem> orderItems = getOrderItems(cartItems);
+        double orderAmount = 0.0;
+        for(CartItem item: orderItems){
+            orderAmount += item.getAmount();
+        }
 
-        Order order = new Order(orderDescription, orderItems);
+        Order order = new Order(orderDescription, LocalDateTime.now(), orderItems, orderAmount);
         Order createdOrder = orderRepository.save(order);
 
 //        orderItems.forEach(orderItem -> {
@@ -52,18 +58,19 @@ public class OrderService {
 
     }
 
-    private List<OrderItem> getOrderItems(List<Map<String, Object>> items) {
-        List<OrderItem> orderItemList = items.stream()
+    private List<CartItem> getOrderItems(List<Map<String, Object>> items) {
+        List<CartItem> orderItems = items.stream()
                 .map(item -> {
                     Long productId = Long.valueOf((Integer)(item.get("productId")));
                     Integer quantity = (Integer)item.get("quantity");
 
-//                    Product productData = productService.getProductData(productId, quantity);
-                    return new OrderItem(productId, quantity);
+                    Product cartProduct = productService.getProductData(productId, quantity);
+
+                    return new CartItem(cartProduct, quantity, cartProduct.getPrice()*quantity);
                 })
                 .collect(Collectors.toList());
 
-        return orderItemList;
+        return orderItems;
     }
 
     public Order updateOrder(Long orderId, Order order){

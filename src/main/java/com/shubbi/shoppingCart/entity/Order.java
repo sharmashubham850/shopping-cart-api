@@ -3,9 +3,11 @@ package com.shubbi.shoppingCart.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
 import javax.persistence.*;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -15,30 +17,34 @@ import java.util.List;
 @AllArgsConstructor
 public class Order {
     @Id
-    @SequenceGenerator(name = "order_sequence", sequenceName = "order_sequence", allocationSize = 50, initialValue = 1001)
+    @SequenceGenerator(name = "order_sequence", sequenceName = "order_sequence", allocationSize = 1, initialValue = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_sequence")
     private Long orderId;
 
     private String description;
+    private LocalDateTime date;
+
+    @Generated(GenerationTime.INSERT)
+    @Column(columnDefinition = "serial")
+    private Integer invoiceNumber;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id", referencedColumnName = "orderId")
-    private List<OrderItem> items;
+    private List<CartItem> items;
 
-    public Order(String description) {
+    private Double totalAmount;
+
+
+    public Order(String description, LocalDateTime date, Double totalAmount) {
         this.description = description;
+        this.date = date;
+        this.totalAmount = totalAmount;
     }
 
-    public Order(String description, List<OrderItem> items) {
+    public Order(String description, LocalDateTime date, List<CartItem> items, Double totalAmount) {
         this.description = description;
+        this.date = date;
         this.items = items;
-    }
-
-    public void addOrderItem(OrderItem item){
-        if (this.items == null) this.items = new ArrayList<>();
-
-        this.items.add(item);
-
-
+        this.totalAmount = totalAmount;
     }
 }
