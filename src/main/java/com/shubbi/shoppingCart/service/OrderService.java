@@ -1,16 +1,18 @@
 package com.shubbi.shoppingCart.service;
 
 import com.shubbi.shoppingCart.entity.Order;
-import com.shubbi.shoppingCart.entity.Product;
+import com.shubbi.shoppingCart.entity.OrderItem;
 import com.shubbi.shoppingCart.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class OrderService {
 
     @Autowired
@@ -27,22 +29,41 @@ public class OrderService {
         return orderRepository.findById(orderId).orElseThrow();
     }
 
+    public List<OrderItem> orderItems(Long orderId){
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        return order.getItems();
+    }
+
     public Order createOrder(Map<String, Object> orderMap){
         String orderDescription = (String) orderMap.get("description");
         List<Map<String, Object>> cartItems = (List<Map<String, Object>>) orderMap.get("items");
 
-        List<Product> orderItems = getOrderItems(cartItems);
+        List<OrderItem> orderItems = getOrderItems(cartItems);
 
-        Order newOrder = new Order(orderDescription, orderItems);
-        return orderRepository.save(newOrder);
+        Order order = new Order(orderDescription, orderItems);
+        Order createdOrder = orderRepository.save(order);
+
+//        orderItems.forEach(orderItem -> {
+//            orderItem.setOrder(createdOrder);
+//        });
+
+        System.out.println("createdOrder = " + createdOrder);
+        return createdOrder;
+
     }
 
-    private List<Product> getOrderItems(List<Map<String, Object>> items) {
-        List<Product> productList = items.stream()
-                .map(item -> productService.getProductData(item))
+    private List<OrderItem> getOrderItems(List<Map<String, Object>> items) {
+        List<OrderItem> orderItemList = items.stream()
+                .map(item -> {
+                    Long productId = Long.valueOf((Integer)(item.get("productId")));
+                    Integer quantity = (Integer)item.get("quantity");
+
+//                    Product productData = productService.getProductData(productId, quantity);
+                    return new OrderItem(productId, quantity);
+                })
                 .collect(Collectors.toList());
 
-        return productList;
+        return orderItemList;
     }
 
     public Order updateOrder(Long orderId, Order order){
@@ -55,7 +76,7 @@ public class OrderService {
                         }
                 ).orElseGet(
                         () -> {
-                            order.setId(orderId);
+                            order.setOrderId(orderId);
                             return orderRepository.save(order);
                         }
                 );

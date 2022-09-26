@@ -1,6 +1,7 @@
 package com.shubbi.shoppingCart.controller;
 
 import com.shubbi.shoppingCart.entity.Order;
+import com.shubbi.shoppingCart.entity.OrderItem;
 import com.shubbi.shoppingCart.service.OrderService;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,13 @@ public class OrderController {
         Order order = orderService.getOrderById(orderId);
 
         return ResponseEntity.ok(order);
+    }
+
+    @GetMapping("/items/{orderId}")
+    public ResponseEntity<List<OrderItem>> getOrderItems(@PathVariable Long orderId){
+        List<OrderItem> orderItemList= orderService.orderItems(orderId);
+
+        return ResponseEntity.ok(orderItemList);
     }
 
     @PostMapping

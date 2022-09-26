@@ -1,6 +1,5 @@
 package com.shubbi.shoppingCart.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,29 +17,28 @@ public class Order {
     @Id
     @SequenceGenerator(name = "order_sequence", sequenceName = "order_sequence", allocationSize = 50, initialValue = 1001)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_sequence")
-    private Long id;
+    private Long orderId;
 
     private String description;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinTable(
-            name="order_product",
-            joinColumns = @JoinColumn(name="order_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name="product_id", referencedColumnName = "id")
-    )
-    private List<Product> items;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "order_id", referencedColumnName = "orderId")
+    private List<OrderItem> items;
 
+    public Order(String description) {
+        this.description = description;
+    }
 
-
-    public Order(String description, List<Product> items) {
+    public Order(String description, List<OrderItem> items) {
         this.description = description;
         this.items = items;
     }
 
-    public void addItem(Product product){
+    public void addOrderItem(OrderItem item){
         if (this.items == null) this.items = new ArrayList<>();
 
-        this.items.add(product);
+        this.items.add(item);
+
+
     }
 }

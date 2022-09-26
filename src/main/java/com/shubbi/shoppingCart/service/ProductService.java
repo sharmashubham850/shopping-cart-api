@@ -55,10 +55,7 @@ public class ProductService {
         productRepository.delete(product);
     }
 
-    public Product getProductData(Map<String, Object> item) {
-        Long productId = Long.valueOf((Integer)item.get("productId"));
-        Integer quantity = (Integer) item.get("quantity");
-
+    public Product getProductData(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new ProductNotFoundException("Product with id: " + productId + " not found!")
         );
