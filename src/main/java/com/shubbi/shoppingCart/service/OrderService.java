@@ -1,5 +1,6 @@
 package com.shubbi.shoppingCart.service;
 
+import com.shubbi.shoppingCart.entity.Customer;
 import com.shubbi.shoppingCart.entity.Order;
 import com.shubbi.shoppingCart.entity.CartItem;
 import com.shubbi.shoppingCart.entity.Product;
@@ -38,7 +39,11 @@ public class OrderService {
 
     public Order createOrder(Map<String, Object> orderMap){
         String orderDescription = (String) orderMap.get("description");
+        String customerName = (String) orderMap.get("customerName");
+        String customerEmail = (String) orderMap.get("customerEmail");
         List<Map<String, Object>> cartItems = (List<Map<String, Object>>) orderMap.get("cartItems");
+
+        Customer newCustomer = new Customer(customerName, customerEmail);
 
         List<CartItem> orderItems = getOrderItems(cartItems);
         double orderAmount = 0.0;
@@ -46,15 +51,10 @@ public class OrderService {
             orderAmount += item.getAmount();
         }
 
-        Order order = new Order(orderDescription, LocalDateTime.now(), orderItems, orderAmount);
-        Order createdOrder = orderRepository.save(order);
+        Order order = new Order(orderDescription, LocalDateTime.now(), newCustomer, orderItems, orderAmount);
 
-//        orderItems.forEach(orderItem -> {
-//            orderItem.setOrder(createdOrder);
-//        });
+        return orderRepository.save(order);
 
-        System.out.println("createdOrder = " + createdOrder);
-        return createdOrder;
 
     }
 
@@ -83,7 +83,7 @@ public class OrderService {
                         }
                 ).orElseGet(
                         () -> {
-                            order.setOrderId(orderId);
+                            order.setId(orderId);
                             return orderRepository.save(order);
                         }
                 );
