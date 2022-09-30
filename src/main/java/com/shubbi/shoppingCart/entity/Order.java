@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenerationTime;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name="orders")
@@ -17,9 +18,8 @@ import java.util.List;
 @AllArgsConstructor
 public class Order {
     @Id
-    @SequenceGenerator(name = "order_sequence", sequenceName = "order_sequence", allocationSize = 1, initialValue = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_sequence")
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     private String description;
     private LocalDateTime date;

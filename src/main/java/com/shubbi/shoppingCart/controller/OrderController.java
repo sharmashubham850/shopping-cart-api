@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -26,15 +27,15 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrder(@PathVariable Long orderId){
+    public ResponseEntity<Order> getOrder(@PathVariable UUID orderId){
         Order order = orderService.getOrderById(orderId);
 
         return ResponseEntity.ok(order);
     }
 
     @GetMapping("/items/{orderId}")
-    public ResponseEntity<List<CartItem>> getOrderItems(@PathVariable Long orderId){
-        List<CartItem> cartItemList = orderService.orderItems(orderId);
+    public ResponseEntity<List<CartItem>> getOrderItems(@PathVariable UUID orderId){
+        List<CartItem> cartItemList = orderService.getOrderItems(orderId);
 
         return ResponseEntity.ok(cartItemList);
     }
@@ -47,14 +48,14 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}")
-    public ResponseEntity<Order> updateOrder(@PathVariable Long orderId, @RequestBody Order order){
+    public ResponseEntity<Order> updateOrder(@PathVariable UUID orderId, @RequestBody Order order){
         Order updatedOrder = orderService.updateOrder(orderId, order);
 
         return ResponseEntity.ok(updatedOrder);
     }
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId){
+    public ResponseEntity<String> deleteOrder(@PathVariable UUID orderId){
         orderService.deleteOrder(orderId);
 
         return ResponseEntity.status(200).body("Order delete successful");

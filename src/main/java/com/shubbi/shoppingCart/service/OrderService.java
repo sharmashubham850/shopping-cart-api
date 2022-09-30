@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,11 +29,11 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Order getOrderById(Long orderId){
+    public Order getOrderById(UUID orderId){
         return orderRepository.findById(orderId).orElseThrow();
     }
 
-    public List<CartItem> orderItems(Long orderId){
+    public List<CartItem> getOrderItems(UUID orderId){
         Order order = orderRepository.findById(orderId).orElseThrow();
         return order.getItems();
     }
@@ -73,7 +74,8 @@ public class OrderService {
         return orderItems;
     }
 
-    public Order updateOrder(Long orderId, Order order){
+
+    public Order updateOrder(UUID orderId, Order order){
         return orderRepository.findById(orderId)
                 .map(
                         o -> {
@@ -89,7 +91,7 @@ public class OrderService {
                 );
     }
 
-    public void deleteOrder(Long orderId){
+    public void deleteOrder(UUID orderId){
         Order order = orderRepository.findById(orderId).orElseThrow();
 
         orderRepository.delete(order);
